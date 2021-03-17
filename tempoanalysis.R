@@ -14,7 +14,7 @@ wjd_inphrase_ll <- wjd_inphrase %>%
                                      "moderato", "allegro", "presto", "prestissimo"))) %>%
   mutate(notespersec_quartile = ntile(notespersec, 4))
 
-#exploring the tempo class variable
+#exploring the tempo class variable - not using it
 genre_tempo_boxplot <- ggplot(wjd_inphrase_ll, aes(x = factor(style), y = avgtempo)) + 
   geom_boxplot()
 
