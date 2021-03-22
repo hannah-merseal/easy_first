@@ -1,6 +1,7 @@
 ###Tempo stuff
 source("analysis.R")
 source("easy_util.R")
+library(hexbin)
 
 #add notes/sec and quartiles; filter wjd_inphrase to JUST lick & line, split tempi
 wjd_inphrase_ll <- wjd_inphrase %>%
@@ -456,3 +457,9 @@ note_density_quartile_plot <- function(data = wjd_inphrase_ll,
   q <- q + geom_point()
   q
 }
+
+#average tempo (x) by note density (notes/sec, y)
+tempoXdensity_plot <- ggplot(wjd_inphrase_ll, aes(x = avgtempo, y = notespersec)) +
+  stat_bin2d(bins = 50) +
+  scale_fill_gradient(low = "lightblue", high = "red") +
+  stat_smooth(method = "lm", level = .99, color = "purple")
