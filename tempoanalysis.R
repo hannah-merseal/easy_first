@@ -5,11 +5,22 @@ library(hexbin)
 
 ##list of important plots
 #ngram_tempoclass_plot(): new tempo classes, facet is n-gram
+##"Data points: 404068, mean eff. size: 0.566627"
+
 #tempoclass_plot(): new tempo classes, facet is tempo class
+##"Data points: 62593, mean eff. size: 0.642087"
+
 #ngram_tempo_quart_plot(): tempo quartiles, facet is n-gram
+##"Data points: 404068, mean eff. size: 0.416973"
+
 #quartile_tempo_plot(): tempo quartiles, facet is quartile
+##"Data points: 62593, mean eff. size: 0.369672"
+
 #ngram_tempo_trad_plot(): classical tempi, facet is n-gram (do not use)
+##"Data points: 404068, mean eff. size: 1.123177"
+
 #trad_tempo_plot(): classical tempi, facet is class (do not use)
+##"Data points: 62593, mean eff. size: 1.053371"
 
 
 #add notes/sec and quartiles; filter wjd_inphrase to JUST lick & line, split tempi, make new bins for tempoclass
