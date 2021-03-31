@@ -34,13 +34,13 @@ wjd_inphrase_ll <- wjd_inphrase %>%
                           labels = c("largo", "adagio", "andante", 
                                      "moderato", "allegro", "presto", "prestissimo"))) %>%
   mutate(notespersec_quartile = ntile(notespersec, 4)) %>%
-  mutate(tempoclass = recode(tempoclass,
+  mutate(tempoclass3 = recode(tempoclass,
                              "SLOW" = "SLOW",
                              "MEDIUM SLOW" = "MEDIUM",
                              "MEDIUM" = "MEDIUM",
                              "MEDIUM UP" = "UP",
                              "UP" = "UP")) %>%
-  mutate(tempoclass = factor(tempoclass, levels = c("SLOW", "MEDIUM", "UP")))
+  mutate(tempoclass3 = factor(tempoclass3, levels = c("SLOW", "MEDIUM", "UP")))
 
 #the tempo class variable is now split into 3 bins instead of 5
 genre_tempo_boxplot <- ggplot(wjd_inphrase_ll, aes(x = factor(style), y = avgtempo)) + 
@@ -64,7 +64,7 @@ ngram_tempoclass_plot <- function(data = wjd_inphrase_ll,
                                    min_N = 3, 
                                    min_freq = 1, 
                                    max_pos = 30, 
-                                   fix_scale = FALSE,
+                                   fix_scale = TRUE,
                                    standardize = FALSE,
                                    facetting = TRUE,
                                    easiness = "combined_easiness",
@@ -79,7 +79,7 @@ ngram_tempoclass_plot <- function(data = wjd_inphrase_ll,
   data <- 
     data %>% 
     filter(N >= min_N, in_phrase, freq >= min_freq, phrase_pos <= max_pos, phrase_len >= N) %>%  
-    group_by(N, phrase_pos, tempoclass) %>% 
+    group_by(N, phrase_pos, tempoclass3) %>% 
     summarise(easiness_mean = mean(easiness), 
               easiness_sd = sd(easiness), 
               n = n(), 
@@ -105,7 +105,7 @@ ngram_tempoclass_plot <- function(data = wjd_inphrase_ll,
   
   q <- 
     data %>% 
-    ggplot(aes(x = phrase_pos, y = easiness_mean, group = factor(tempoclass), color = factor(tempoclass))) 
+    ggplot(aes(x = phrase_pos, y = easiness_mean, group = factor(tempoclass3), color = factor(tempoclass3))) 
   q <- q + geom_errorbar(aes(ymin = easiness_mean - easiness_se, ymax = easiness_mean + easiness_se)) 
   if(facetting){
     if(fix_scale){
@@ -130,12 +130,14 @@ ngram_tempoclass_plot <- function(data = wjd_inphrase_ll,
   q
 }
 
-#tempo class plot where facet is new tempo class, n-gram = 3
+#tempo class plot where facet is new tempo class, n-gram = 4
+#add lick & line to this one -> color by lick/line
+#then do beta coefficient from new_paper_production (plot_linear_betas)
 tempoclass_plot <- function(data = wjd_inphrase_ll, 
                                 min_N = 3, 
                                 min_freq = 1, 
                                 max_pos = 30, 
-                                fix_scale = FALSE,
+                                fix_scale = TRUE,
                                 standardize = FALSE,
                                 facetting = TRUE,
                                 easiness = "combined_easiness",
@@ -150,7 +152,7 @@ tempoclass_plot <- function(data = wjd_inphrase_ll,
   data <- 
     data %>% 
     filter(N == min_N, in_phrase, freq >= min_freq, phrase_pos <= max_pos, phrase_len >= N) %>%  
-    group_by(N, phrase_pos, tempoclass) %>% 
+    group_by(N, phrase_pos, tempoclass3) %>% 
     summarise(easiness_mean = mean(easiness), 
               easiness_sd = sd(easiness), 
               n = n(), 
@@ -176,14 +178,14 @@ tempoclass_plot <- function(data = wjd_inphrase_ll,
   
   q <- 
     data %>% 
-    ggplot(aes(x = phrase_pos, y = easiness_mean, color = factor(tempoclass))) 
+    ggplot(aes(x = phrase_pos, y = easiness_mean, color = factor(tempoclass3))) 
   q <- q + geom_errorbar(aes(ymin = easiness_mean - easiness_se, ymax = easiness_mean + easiness_se)) 
   if(facetting){
     if(fix_scale){
-      q <- q + facet_wrap(~tempoclass) 
+      q <- q + facet_wrap(~tempoclass3) 
     }
     else{
-      q <- q + facet_wrap(~tempoclass, scales = "free_y") 
+      q <- q + facet_wrap(~tempoclass3, scales = "free_y") 
     }
     q <- q + theme(legend.position = "none") 
   }
@@ -198,6 +200,46 @@ tempoclass_plot <- function(data = wjd_inphrase_ll,
   q <- q + theme_bw() 
   q <- q + labs(x = "Phrase position", y  = easiness_label, caption  = sprintf("N = %d", sum(data$n))) 
   q <- q + geom_point()
+  q
+}
+
+#tempo class linear betas
+plot_linear_betas_tempoclass <- function(data = wjd_inphrase_ll, 
+                              MLA_main_types = c("lick", "line"),
+                              easiness = "combined_easiness",
+                              max_pos_range = 10:30, min_N = 3, 
+                              p_thresh = .001,
+                              alpha = 1){
+  #browser()
+  lb_SLOW <- get_linear_betas(data = data %>% filter(tempoclass3 == "SLOW"), 
+                             min_N = min_N, 
+                             easiness = easiness, 
+                             MLA_main_type = MLA_main_types,
+                             max_pos_range = max_pos_range) %>% mutate(tempoclass3 = "SLOW")
+  lb_MEDIUM <- get_linear_betas(data = data %>% filter(tempoclass3 == "MEDIUM"), 
+                               min_N = min_N, 
+                               easiness = easiness,
+                               MLA_main_type = MLA_main_types,
+                               max_pos_range = max_pos_range) %>% mutate(tempoclass3 = "MEDIUM")
+  lb_UP <- get_linear_betas(data = data %>% filter(tempoclass3 == "UP"), 
+                                min_N = min_N, 
+                                easiness = easiness,
+                                MLA_main_type = MLA_main_types,
+                                max_pos_range = max_pos_range) %>% mutate(tempoclass3 = "UP")
+  lb <- bind_rows(lb_SLOW , lb_MEDIUM, lb_UP) %>% mutate(comb_tempoclass = sprintf("%s-%s", tempoclass3, MLA_main_type))
+  assign("lb", lb, globalenv())
+  q <- lb %>% filter(p.value < p_thresh) %>% 
+    ggplot(aes(x = max_pos, y = estimate)) 
+  q <- q + geom_ribbon(aes(ymin = estimate-std.error, ymax = estimate + std.error, fill = tempoclass3, group = comb_tempoclass), 
+                       alpha = alpha) 
+  q <- q + geom_line(aes(linetype = MLA_main_type, group = comb_tempoclass), colour = "black") 
+  q <- q + facet_wrap(~N) 
+  q <- q + get_default_theme(keep_legend = T)  
+  q <- q + theme(legend.key.size = unit(0.5, "cm")) 
+  q <- q + theme(legend.key.width = unit(1.0, "cm")) 
+  q <- q + theme(legend.position = c(.85, .1), legend.background = element_rect(colour = "black")) 
+  q <- q + geom_hline(yintercept = 0)
+  q <- q + labs(x = "End Position", y = get_easiness_label(easiness))
   q
 }
 
