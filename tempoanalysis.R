@@ -294,7 +294,7 @@ tempoclass_plot_ll <- function(data = wjd_inphrase_ll,
   data <- 
     data %>% 
     filter(N == min_N, in_phrase, freq >= min_freq, phrase_pos <= max_pos, phrase_len >= N) %>%  
-    group_by(N, phrase_pos, tempoclass3) %>% 
+    group_by(N, phrase_pos, tempoclass3, MLA_main_type) %>% 
     summarise(easiness_mean = mean(easiness), 
               easiness_sd = sd(easiness), 
               n = n(), 
@@ -320,7 +320,7 @@ tempoclass_plot_ll <- function(data = wjd_inphrase_ll,
   
   q <- 
     data %>% 
-    ggplot(aes(x = phrase_pos, y = easiness_mean, color = factor(tempoclass3))) 
+    ggplot(aes(x = phrase_pos, y = easiness_mean, color = factor(MLA_main_type))) 
   q <- q + geom_errorbar(aes(ymin = easiness_mean - easiness_se, ymax = easiness_mean + easiness_se)) 
   if(facetting){
     if(fix_scale){
@@ -385,6 +385,13 @@ plot_linear_betas_tempoclass <- function(data = wjd_inphrase_ll,
   q
 }
 
+# effect sizes
+line_slow_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "line", tempoclass3 == "SLOW"))
+lick_slow_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "lick", tempoclass3 == "SLOW"))
+line_med_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "line", tempoclass3 == "MEDIUM"))
+lick_med_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "lick", tempoclass3 == "MEDIUM"))
+line_up_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "line", tempoclass3 == "UP"))
+lick_up_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "lick", tempoclass3 == "UP"))
 # #tempo quartile plot where facet is n-gram
 # ngram_tempo_quart_plot <- function(data = wjd_inphrase_ll, 
 #                              min_N = 3, 
@@ -669,3 +676,11 @@ plot_linear_betas_tempoclass <- function(data = wjd_inphrase_ll,
 #   q
 # }
 
+tempo.means <- wjd_inphrase_ll %>%
+  group_by(tempoclass3) %>%
+  summarize(
+    mean_tempo = mean(avgtempo),
+    sd_tempo = sd(avgtempo),
+    min_tempo = min(avgtempo),
+    max_tempo = max(avgtempo)
+  )

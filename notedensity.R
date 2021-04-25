@@ -196,3 +196,30 @@ plot_linear_betas_notedensity <- function(data = wjd_inphrase_ll,
   q <- q + labs(x = "End Position", y = get_easiness_label(easiness))
   q
 }
+
+#effect sizes
+# effect sizes
+line_Q1_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "line", notespersec_quartile == "1"))
+lick_Q1_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "lick", notespersec_quartile == "1"))
+line_Q2_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "line", notespersec_quartile == "2"))
+lick_Q2_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "lick", notespersec_quartile == "2"))
+line_Q3_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "line", notespersec_quartile == "3"))
+lick_Q3_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "lick", notespersec_quartile == "3"))
+line_Q4_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "line", notespersec_quartile == "4"))
+lick_Q4_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "lick", notespersec_quartile == "4"))
+
+density.means <- wjd_inphrase_ll %>%
+  group_by(notespersec_quartile) %>%
+  summarize(
+    mean_dense = mean(notespersec),
+    sd_dense = sd(notespersec),
+    min_dense = min(notespersec),
+    max_dense = max(notespersec)
+  )
+
+library("Hmisc")
+TempoCorr <- wjd_inphrase_ll %>%
+  dplyr::select(avgtempo, notespersec)
+TempoCorr.rcorr <- rcorr(as.matrix(TempoCorr))
+TempoCorr.coeff <- TempoCorr.rcorr$r %>% round(2)
+TempoCorr.p <- TempoCorr.rcorr$P %>% round(3)
