@@ -678,7 +678,8 @@ lick_up_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "
 
 tempo.means <- wjd_inphrase_ll %>%
   group_by(tempoclass3) %>%
-  summarize(
+  filter(N >=3) %>%
+  dplyr::summarize(
     mean_tempo = mean(avgtempo),
     sd_tempo = sd(avgtempo),
     min_tempo = min(avgtempo),

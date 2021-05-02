@@ -147,10 +147,14 @@ note_density_quartile_plot <- function(data = wjd_inphrase_ll,
 }
 
 #average tempo (x) by note density (notes/sec, y)
-tempoXdensity_plot <- ggplot(wjd_inphrase_ll, aes(x = avgtempo, y = notespersec)) +
+wjd_inphrase_ll_3 <- wjd_inphrase_ll %>% 
+  filter(N >= 3)
+tempoXdensity_plot <- ggplot(wjd_inphrase_ll_3, aes(x = avgtempo, y = notespersec)) +
   stat_bin2d(bins = 50) +
   scale_fill_gradient(low = "lightblue", high = "red") +
-  stat_smooth(method = "lm", level = .99, color = "purple")
+  stat_smooth(method = "lm", level = .99, color = "black") +
+  xlab("Average Tempo (BPM)") + 
+  ylab("Note Density (Notes/Second)")
 
 #trend analysis for note density
 plot_linear_betas_notedensity <- function(data = wjd_inphrase_ll, 
@@ -210,16 +214,18 @@ lick_Q4_eff_in <- get_effect_sizes(wjd_inphrase_ll %>% filter(MLA_main_type == "
 
 density.means <- wjd_inphrase_ll %>%
   group_by(notespersec_quartile) %>%
-  summarize(
+  dplyr::filter(N >= 3) %>%
+  dplyr::summarize(
     mean_dense = mean(notespersec),
     sd_dense = sd(notespersec),
     min_dense = min(notespersec),
     max_dense = max(notespersec)
   )
 
-library("Hmisc")
+library(Hmisc)
 TempoCorr <- wjd_inphrase_ll %>%
-  dplyr::select(avgtempo, notespersec)
+  dplyr::select(N, avgtempo, notespersec) %>%
+  dplyr::filter(N >= 3)
 TempoCorr.rcorr <- rcorr(as.matrix(TempoCorr))
 TempoCorr.coeff <- TempoCorr.rcorr$r %>% round(2)
 TempoCorr.p <- TempoCorr.rcorr$P %>% round(3)
