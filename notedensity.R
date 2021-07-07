@@ -148,13 +148,25 @@ note_density_quartile_plot <- function(data = wjd_inphrase_ll,
 
 #average tempo (x) by note density (notes/sec, y)
 wjd_inphrase_ll_3 <- wjd_inphrase_ll %>% 
-  filter(N >= 3)
+  filter(N >= 3) 
+
 tempoXdensity_plot <- ggplot(wjd_inphrase_ll_3, aes(x = avgtempo, y = notespersec)) +
   stat_bin2d(bins = 50) +
   scale_fill_gradient(low = "lightblue", high = "red") +
   stat_smooth(method = "lm", level = .99, color = "black") +
   xlab("Average Tempo (BPM)") + 
   ylab("Note Density (Notes/Second)")
+
+#distributions
+density.hist <- ggplot(wjd_inphrase_ll_3, aes(x = notespersec, fill = MLA_main_type)) +
+  geom_histogram(binwidth = 2, position = "identity", alpha = 0.4) +
+  facet_wrap(~N) +
+  labs(x = "Note Density (Notes/Second)", y = "Count")
+
+tempo.hist <- ggplot(wjd_inphrase_ll_3, aes(x = avgtempo, fill = MLA_main_type)) +
+  geom_histogram(binwidth = 10, position = "identity", alpha = 0.4) +
+  facet_wrap(~N) +
+  labs(x = "Average Tempo (BPM)", y = "Count")
 
 #trend analysis for note density
 plot_linear_betas_notedensity <- function(data = wjd_inphrase_ll, 

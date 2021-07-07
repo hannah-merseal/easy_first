@@ -685,3 +685,12 @@ tempo.means <- wjd_inphrase_ll %>%
     min_tempo = min(avgtempo),
     max_tempo = max(avgtempo)
   )
+
+#tables for MS
+tempo.table <- wjd_inphrase_ll %>% group_by(tempoclass3) %>% filter(N >=3) %>%
+  summarize(NumSolos = n_distinct(melid), NumPhrases = n_distinct(g_phrase_id), 
+            NumNGram = n_distinct(instance_id), MinBPM = min(avgtempo), MaxBPM = max(avgtempo), meanBPM = mean(avgtempo))
+
+density.table <- wjd_inphrase_ll %>% group_by(notespersec_quartile) %>% filter(N >=3) %>%
+  summarize(NumSolos = n_distinct(melid), NumPhrases = n_distinct(g_phrase_id), 
+            NumNGram = n_distinct(instance_id), MinDensity = min(notespersec), MaxDensity = max(notespersec), meanDensity = mean(notespersec))
